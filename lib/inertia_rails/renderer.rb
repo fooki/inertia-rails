@@ -4,8 +4,9 @@ module InertiaRails
   class Renderer
     attr_reader :component, :view_data
 
-    def initialize(component, request, response, render_method, props:, view_data:)
+    def initialize(component, controller, request, response, render_method, props:, view_data:)
       @component = component
+      @controller = controller
       @request = request
       @response = response
       @render_method = render_method
@@ -28,7 +29,7 @@ module InertiaRails
     def props
       only = (@request.headers['X-Inertia-Partial-Data'] || '').split(',').compact.map(&:to_sym)
 
-      _props = ::InertiaRails.shared_data.merge(@props)
+      _props = ::InertiaRails.shared_data(@controller).merge(@props)
 
       _props = (only.any? && @request.headers['X-Inertia-Partial-Component'] == component) ?
         _props.select {|key| key.in? only} :
