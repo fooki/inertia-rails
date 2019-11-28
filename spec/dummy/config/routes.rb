@@ -12,4 +12,5 @@ Rails.application.routes.draw do
   patch 'redirect_test' => 'inertia_test#redirect_test'
   put 'redirect_test' => 'inertia_test#redirect_test'
   delete 'redirect_test' => 'inertia_test#redirect_test'
+  post 'redirect_to_share_test' => 'inertia_test#redirect_to_share_test'
 end
