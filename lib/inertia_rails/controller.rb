@@ -4,13 +4,36 @@ module InertiaRails
   module Controller
     extend ActiveSupport::Concern
 
-    module ClassMethods
-      def inertia_share(**args, &block)
-        before_action do
-          InertiaRails.share(args) if args
-          InertiaRails.share_block(block) if block
-        end
+    included do
+      class_attribute :shared_plain_data, default: {}
+      class_attribute :shared_blocks, default: []
+    end
+
+    class_methods do
+      def inertia_share(hash = nil, &block)
+        share_plain_data(hash) if hash
+        share_block(&block) if block_given?
       end
+
+      private
+
+      def share_plain_data(hash)
+        self.shared_plain_data = shared_plain_data.merge(hash)
+      end
+
+      def share_block(&block)
+        self.shared_blocks = shared_blocks + [ block ]
+      end
+    end
+
+    def shared_data
+      shared_plain_data.merge(evaluated_blocks)
+    end
+
+    private
+
+    def evaluated_blocks
+      shared_blocks.map { |block| instance_exec(&block) }.reduce(&:merge) || {}
     end
   end
 end
