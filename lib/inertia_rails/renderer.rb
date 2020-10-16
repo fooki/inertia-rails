@@ -4,7 +4,7 @@ module InertiaRails
   class Renderer
     attr_reader :component, :view_data
 
-    def initialize(component, controller, request, response, render_method, props:, view_data:)
+    def initialize(component, controller, request, response, render_method, props:, view_data:, url: nil)
       @component = component
       @controller = controller
       @request = request
@@ -12,6 +12,7 @@ module InertiaRails
       @render_method = render_method
       @props = props || {}
       @view_data = view_data || {}
+      @url = url || request.original_fullpath
     end
 
     def render
@@ -42,7 +43,7 @@ module InertiaRails
       {
         component: component,
         props: props,
-        url: @request.original_fullpath,
+        url: @url,
         version: ::InertiaRails.version,
       }
     end

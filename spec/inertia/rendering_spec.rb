@@ -3,7 +3,7 @@ RSpec.describe 'rendering inertia views', type: :request do
 
   context 'first load' do
     let(:page) { InertiaRails::Renderer.new('TestComponent', '', request, response, '', props: nil, view_data: nil).send(:page) }
-    
+
     context 'with props' do
       let(:page) { InertiaRails::Renderer.new('TestComponent', '', request, response, '', props: {name: 'Brandon', sport: 'hockey'}, view_data: nil).send(:page) }
       before { get props_path }
@@ -42,6 +42,16 @@ RSpec.describe 'rendering inertia views', type: :request do
 
     it 'has the proper body' do
       expect(JSON.parse(response.body)).to include('url' => '/props')
+    end
+  end
+
+  context 'with a manually set url' do
+    let(:headers) { {'X-Inertia' => true} }
+
+    before { get with_url_path, headers: headers }
+
+    it 'sends the url in the response' do
+      expect(JSON.parse(response.body)).to include('url' => '/some-other-path')
     end
   end
 end

@@ -17,4 +17,8 @@ class InertiaRenderTestController < ApplicationController
   def component
     render inertia: 'TestComponent'
   end
+
+  def with_url
+    render inertia: 'TestComponent', url: '/some-other-path'
+  end
 end
