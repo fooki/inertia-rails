@@ -19,6 +19,6 @@ class InertiaRenderTestController < ApplicationController
   end
 
   def with_url
-    render inertia: 'TestComponent', url: '/some-other-path'
+    render inertia: 'TestComponent', preserve_headers: true
   end
 end

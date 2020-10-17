@@ -14,7 +14,7 @@ ActionController::Renderers.add :inertia do |component, options|
     method(:render),
     props: options[:props],
     view_data: options[:view_data],
-    url: options[:url]
+    preserve_headers: options[:preserve_headers],
   ).render
 end
 

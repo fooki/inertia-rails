@@ -45,13 +45,34 @@ RSpec.describe 'rendering inertia views', type: :request do
     end
   end
 
-  context 'with a manually set url' do
-    let(:headers) { {'X-Inertia' => true} }
+  context 'preserving headers' do
+    let(:headers) {
+      {
+        'X-Inertia' => true,
+        'X-Inertia-Version' => original_version,
+        'Referer' => referer_url
+      }
+    }
 
-    before { get with_url_path, headers: headers }
+    let(:original_version) { "1.0" }
+    let(:updated_version) { "1.1" }
+    let(:referer_url) { "/some-path" }
 
-    it 'sends the url in the response' do
-      expect(JSON.parse(response.body)).to include('url' => '/some-other-path')
+    before {
+      InertiaRails.configure{|c| c.version = updated_version}
+      post with_url_path, headers: headers
+    }
+
+    after {
+      InertiaRails.configure{|c| c.version = nil}
+    }
+
+    it 'preserves the version' do
+      expect(JSON.parse(response.body)).to include('version' => original_version)
+    end
+
+    it 'preserves the url' do
+      expect(JSON.parse(response.body)).to include('url' => referer_url)
     end
   end
 end
