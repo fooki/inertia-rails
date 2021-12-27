@@ -3,7 +3,7 @@ RSpec.describe 'rendering inertia views', type: :request do
 
   context 'first load' do
     let(:page) { InertiaRails::Renderer.new('TestComponent', '', request, response, '', props: nil, view_data: nil).send(:page) }
-    
+
     context 'with props' do
       let(:page) { InertiaRails::Renderer.new('TestComponent', '', request, response, '', props: {name: 'Brandon', sport: 'hockey'}, view_data: nil).send(:page) }
       before { get props_path }
@@ -33,6 +33,75 @@ RSpec.describe 'rendering inertia views', type: :request do
       before { get inertia_route_path }
 
       it { is_expected.to include inertia_div(page) }
+    end
+
+    context 'with a layout option' do
+      before do
+        InertiaRails.configure do |config|
+          config.layout = 'testing'
+        end
+      end
+
+      after do
+        InertiaRails.configure do |config|
+          config.layout = 'application'
+        end
+      end
+
+      context 'without any layout specified in controller' do
+        it 'renders configured layout' do
+          get props_path
+          expect(response.body).to include "Testing Layout"
+        end
+      end
+
+      context 'with custom inline layout' do
+        it 'renders custom layout' do
+          get custom_inline_layout_path
+          expect(response.body).to include "Custom Layout"
+        end
+      end
+
+
+      context 'with controller layout set' do
+        around do |example|
+          InertiaRenderTestController.layout 'custom'
+          example.run
+          InertiaRenderTestController.layout nil
+        end
+
+        it 'renders custom layout' do
+          get props_path
+          expect(response.body).to include "Custom Layout"
+        end
+      end
+
+      context 'with parent controller layout set' do
+        around do |example|
+          ApplicationController.layout 'custom'
+          example.run
+          ApplicationController.layout nil
+        end
+
+        it 'renders custom layout' do
+          get props_path
+          expect(response.body).to include "Custom Layout"
+        end
+      end
+
+      context 'configured with a nonexisting layout' do
+        around do |example|
+          ApplicationController.layout 'THIS LAYOUT DOES NOT EXIST'
+          example.run
+          ApplicationController.layout nil
+        end
+
+        it 'crashes similarly to rails default renderer' do
+          expect {
+            get props_path
+          }.to raise_error(ActionView::MissingTemplate)
+        end
+      end
     end
   end
 

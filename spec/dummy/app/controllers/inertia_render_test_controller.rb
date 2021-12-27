@@ -1,5 +1,4 @@
 class InertiaRenderTestController < ApplicationController
-  
   def props
     render inertia: 'TestComponent', props: {
       name: 'Brandon',
@@ -27,5 +26,9 @@ class InertiaRenderTestController < ApplicationController
       end,
       grit: InertiaRails.lazy(->{ 'intense' })
     }
+  end
+
+  def custom_inline_layout
+    render inertia: 'TestComponent', layout: 'custom'
   end
 end

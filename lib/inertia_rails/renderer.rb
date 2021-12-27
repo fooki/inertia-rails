@@ -4,7 +4,7 @@ module InertiaRails
   class Renderer
     attr_reader :component, :view_data
 
-    def initialize(component, controller, request, response, render_method, props:, view_data:)
+    def initialize(component, controller, request, response, render_method, props:, view_data:, layout: nil)
       @component = component
       @controller = controller
       @request = request
@@ -12,6 +12,7 @@ module InertiaRails
       @render_method = render_method
       @props = props || {}
       @view_data = view_data || {}
+      @layout = layout
     end
 
     def render
@@ -20,11 +21,21 @@ module InertiaRails
         @response.set_header('X-Inertia', 'true')
         @render_method.call json: page, status: @response.status, content_type: Mime[:json]
       else
-        @render_method.call template: 'inertia', layout: ::InertiaRails.layout, locals: (view_data).merge({page: page})
+        @render_method.call template: 'inertia', layout: layout, locals: (view_data).merge({page: page})
       end
     end
 
     private
+
+    def layout
+      case @layout
+      when Proc
+        # Passed as a controller-level set layout, or none set at all
+        @layout.call(@controller.lookup_context) || ::InertiaRails.layout
+      else
+        @layout
+      end
+    end
 
     def props
       _props = ::InertiaRails.shared_data(@controller).merge(@props).select do |key, prop|
